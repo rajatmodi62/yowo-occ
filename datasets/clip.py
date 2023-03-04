@@ -93,6 +93,8 @@ def fill_truth_detection(labpath, w, h, flip, dx, dy, sx, sy):
     label = np.zeros((max_boxes,5))
     if os.path.getsize(labpath):
         bs = np.loadtxt(labpath)
+        # print("truth detectopm",bs)
+        # exit(1)
         if bs is None:
             return label
         bs = np.reshape(bs, (-1, 5))
@@ -136,6 +138,7 @@ def fill_truth_detection(labpath, w, h, flip, dx, dy, sx, sy):
                 break
 
     label = np.reshape(label, (-1))
+    # print("label shape", label.shape,np.max(label))
     return label
 
 def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, shape, dataset_use='ucf24', jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5):
@@ -196,6 +199,7 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
         elif tsz > 0:
             label[0:tsz] = tmp
 
+    # print("in dataloader", type(clip[0]), type(label), label.shape)
     if train:
         return clip, label
     else:

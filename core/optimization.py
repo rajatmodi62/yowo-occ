@@ -43,6 +43,8 @@ def train_ucf24_jhmdb21(cfg, epoch, model, train_loader, loss_module, optimizer)
     for batch_idx, (data, target) in enumerate(train_loader):
         data = data.cuda()
         output = model(data)
+        # print("before loss mdule", target.shape)
+        # exit(1)
         loss = loss_module(output, target, epoch, batch_idx, l_loader)
 
         loss.backward()
@@ -54,7 +56,7 @@ def train_ucf24_jhmdb21(cfg, epoch, model, train_loader, loss_module, optimizer)
         # save result every 1000 batches
         if batch_idx % 2000 == 0: # From time to time, reset averagemeters to see improvements
             loss_module.reset_meters()
-
+        break
     t1 = time.time()
     logging('trained with %f samples/s' % (len(train_loader.dataset)/(t1-t0)))
     print('')
@@ -144,19 +146,38 @@ def test_ucf24_jhmdb21(cfg, epoch, model, test_loader):
                 boxes = all_boxes[i]
                 boxes = nms(boxes, nms_thresh)
                 if cfg.TRAIN.DATASET == 'ucf24':
-                    detection_path = os.path.join('ucf_detections', 'detections_'+str(epoch), frame_idx[i])
-                    current_dir = os.path.join('ucf_detections', 'detections_'+str(epoch))
-                    if not os.path.exists('ucf_detections'):
-                        os.mkdir('ucf_detections')
+                    det_root = cfg.TRAIN.EVALUATE_DIR
+                    
+                    detection_path = os.path.join(det_root, 'detections_'+str(epoch), frame_idx[i])
+                    current_dir = os.path.join(det_root, 'detections_'+str(epoch))
+                    if not os.path.exists(det_root):
+                        os.mkdir(det_root)
                     if not os.path.exists(current_dir):
                         os.mkdir(current_dir)
+
+                    # detection_path = os.path.join('ucf_detections', 'detections_'+str(epoch), frame_idx[i])
+                    # current_dir = os.path.join('ucf_detections', 'detections_'+str(epoch))
+                    # if not os.path.exists('ucf_detections'):
+                    #     os.mkdir('ucf_detections')
+                    # if not os.path.exists(current_dir):
+                    #     os.mkdir(current_dir)
                 else:
-                    detection_path = os.path.join('jhmdb_detections', 'detections_'+str(epoch), frame_idx[i])
-                    current_dir = os.path.join('jhmdb_detections', 'detections_'+str(epoch))
-                    if not os.path.exists('jhmdb_detections'):
-                        os.mkdir('jhmdb_detections')
+
+                    det_root = cfg.TRAIN.EVALUATE_DIR
+                    
+                    detection_path = os.path.join(det_root, 'detections_'+str(epoch), frame_idx[i])
+                    current_dir = os.path.join(det_root, 'detections_'+str(epoch))
+                    if not os.path.exists(det_root):
+                        os.mkdir(det_root)
                     if not os.path.exists(current_dir):
                         os.mkdir(current_dir)
+                    
+                    # detection_path = os.path.join('jhmdb_detections', 'detections_'+str(epoch), frame_idx[i])
+                    # current_dir = os.path.join('jhmdb_detections', 'detections_'+str(epoch))
+                    # if not os.path.exists('jhmdb_detections'):
+                    #     os.mkdir('jhmdb_detections')
+                    # if not os.path.exists(current_dir):
+                    #     os.mkdir(current_dir)
 
                 with open(detection_path, 'w+') as f_detect:
                     for box in boxes:

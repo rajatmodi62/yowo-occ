@@ -68,6 +68,12 @@ _C.TRAIN.DETECT_PATH = ""
 _C.TRAIN.ONLY_DETECT = False
 
 _C.TRAIN.EVALUATE = False
+#rajat add directories for dumping 
+_C.TRAIN.EVALUATE_DIR = 'ucf_clean'
+
+
+
+
 _C.TRAIN.BEGIN_EPOCH = 1
 _C.TRAIN.END_EPOCH = 6
 # use groundtruth for validation
@@ -535,7 +541,7 @@ _C.BENCHMARK.SHUFFLE = True
 _C.DATA_LOADER = CfgNode()
 
 # Number of data loader workers per training process.
-_C.DATA_LOADER.NUM_WORKERS = 8
+_C.DATA_LOADER.NUM_WORKERS = 16
 
 # Load data to pinned host memory.
 _C.DATA_LOADER.PIN_MEMORY = True

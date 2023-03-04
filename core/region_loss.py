@@ -133,6 +133,8 @@ class RegionLoss(nn.Module):
         self.noobject_scale = cfg.SOLVER.NOOBJECT_SCALE
         self.class_scale    = cfg.SOLVER.CLASS_SCALE
         self.coord_scale    = cfg.SOLVER.COORD_SCALE
+        print("fofal loss init", self.num_classes)
+        # exit(1)
         self.focalloss      = FocalLoss(class_num=self.num_classes, gamma=2, size_average=False)
         self.thresh = 0.6
         self.l_x = AverageMeter()
@@ -154,6 +156,9 @@ class RegionLoss(nn.Module):
 
 
     def forward(self, output, target, epoch, batch_idx, l_loader):
+        
+        print("rm output", output.shape,self.num_anchors,self.num_classes,target.shape,torch.max(target))
+        # exit(1)
         # output : B*A*(4+1+num_classes)*H*W
         # B: number of batches
         # A: number of anchors
@@ -249,6 +254,8 @@ class RegionLoss(nn.Module):
         loss_conf = nn.MSELoss(reduction='sum')(conf*conf_mask, tconf*conf_mask)/2.0
 
         # try focal loss with gamma = 2
+        
+        # print("rm, enter focal loss--------___>")
         loss_cls = self.class_scale * self.focalloss(cls, tcls)
 
         # sum of loss
@@ -264,7 +271,7 @@ class RegionLoss(nn.Module):
         self.l_cls.update(loss_cls.data.item(), self.batch)
         self.l_total.update(loss.data.item(), self.batch)
 
-
+        print("------------------> rm estimated")
         if batch_idx % 20 == 0: 
             print('Epoch: [%d][%d/%d]:\t nGT %d, recall %d, proposals %d, loss: x %.2f(%.2f), '
                   'y %.2f(%.2f), w %.2f(%.2f), h %.2f(%.2f), conf %.2f(%.2f), '
@@ -490,6 +497,9 @@ class RegionLoss_Ava(nn.Module):
         # H: height of the image (in grids)
         # W: width of the image (in grids)
         # for each grid cell, there are A*(4+1+num_classes) parameters
+        
+        print("output shape", output.shape)
+        
         t0 = time.time()
         nB = output.data.size(0)
         nA = self.num_anchors

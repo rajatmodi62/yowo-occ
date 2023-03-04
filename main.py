@@ -65,10 +65,14 @@ if cfg.TRAIN.RESUME_PATH:
     print('loading checkpoint {}'.format(cfg.TRAIN.RESUME_PATH))
     checkpoint = torch.load(cfg.TRAIN.RESUME_PATH)
     cfg.TRAIN.BEGIN_EPOCH = checkpoint['epoch'] + 1
-    best_score = checkpoint['score']
+    # best_score = checkpoint['score']
     model.load_state_dict(checkpoint['state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer'])
-    print("Loaded model score: ", checkpoint['score'])
+    print("checkpoint optmizer", checkpoint['optimizer'].keys())
+    #dont load the optimizer
+    # optimizer.load_state_dict(checkpoint['optimizer'])
+    
+    
+    # print("Loaded model score: ", checkpoint['score'])
     print("===================================================================")
     del checkpoint
 
@@ -128,7 +132,9 @@ if cfg.TRAIN.EVALUATE:
     logging('evaluating ...')
     test(cfg, 0, model, test_loader)
 else:
-    for epoch in range(cfg.TRAIN.BEGIN_EPOCH, cfg.TRAIN.END_EPOCH + 1):
+    # for epoch in range(cfg.TRAIN.BEGIN_EPOCH, cfg.TRAIN.END_EPOCH + 1):
+    for epoch in range(0, cfg.TRAIN.END_EPOCH + 1):
+
         # Adjust learning rate
         lr_new = adjust_learning_rate(optimizer, epoch, cfg)
         
@@ -136,20 +142,21 @@ else:
         logging('training at epoch %d, lr %f' % (epoch, lr_new))
         train(cfg, epoch, model, train_loader, loss_module, optimizer)
         logging('testing at epoch %d' % (epoch))
-        score = test(cfg, epoch, model, test_loader)
+        # score = test(cfg, epoch, model, test_loader)
 
         # Save the model to backup directory
-        is_best = score > best_score
-        if is_best:
-            print("New best score is achieved: ", score)
-            print("Previous score was: ", best_score)
-            best_score = score
+        # is_best = score > best_score
+        # if is_best:
+        #     print("New best score is achieved: ", score)
+        #     print("Previous score was: ", best_score)
+        #     best_score = score
 
         state = {
             'epoch': epoch,
             'state_dict': model.state_dict(),
             'optimizer': optimizer.state_dict(),
-            'score': score
+            # 'score': score
             }
-        save_checkpoint(state, is_best, cfg.BACKUP_DIR, cfg.TRAIN.DATASET, cfg.DATA.NUM_FRAMES)
+        # save_checkpoint(state, is_best, cfg.BACKUP_DIR, cfg.TRAIN.DATASET, cfg.DATA.NUM_FRAMES)
+        save_checkpoint(state, True, cfg.BACKUP_DIR, cfg.TRAIN.DATASET, cfg.DATA.NUM_FRAMES)
         logging('Weights are saved to backup directory: %s' % (cfg.BACKUP_DIR))

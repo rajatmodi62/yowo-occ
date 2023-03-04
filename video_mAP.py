@@ -257,9 +257,9 @@ def video_mAP_jhmdb():
 
     detected_boxes = {}
     gt_videos = {}
-    for line in lines:
+    for done, line in enumerate(lines):
         print(line)
-
+        print("done", done, "/", len(lines))
         line = line.rstrip()
 
         test_loader = torch.utils.data.DataLoader(
@@ -274,6 +274,7 @@ def video_mAP_jhmdb():
         t_label = -1
 
         for batch_idx, (data, target, img_name) in enumerate(test_loader):
+            
             path_split = img_name[0].split('/')
             if video_name == '':
                 video_name = os.path.join(path_split[0], path_split[1])
@@ -319,6 +320,8 @@ def video_mAP_jhmdb():
                         gt_boxes.append(float(truths[g][1]+truths[g][3]/2.0) * 320.0)
                         gt_boxes.append(float(truths[g][2]+truths[g][4]/2.0) * 240.0)
                         all_gt_boxes.append(gt_boxes)
+        if done>50:
+            break
                     
         v_annotation['gt_classes'] = t_label
         v_annotation['tubes'] = np.expand_dims(np.array(all_gt_boxes), axis=0)

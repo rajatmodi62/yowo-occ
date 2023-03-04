@@ -105,6 +105,7 @@ def getBoundingBoxes(directory,
     os.chdir(directory)
     files = glob.glob("*.txt")
     files.sort()
+    print("in get dir", len(files))
     # Read GT detections from txt file
     # Each line of the files in the groundtruths folder represents a ground truth bounding box
     # (bounding boxes that a detector should detect)
@@ -112,7 +113,10 @@ def getBoundingBoxes(directory,
     # Class_id represents the class of the bounding box
     # x, y represents the most top-left coordinates of the bounding box
     # x2, y2 represents the most bottom-right coordinates of the bounding box
-    for f in files:
+    for done, f in enumerate(files):
+        print("read gt", done, '/', len(files))
+        # if done>1000:
+        #     continue
         nameOfImage = f.replace(".txt", "")
         fh1 = open(f, "r")
         for line in fh1:
@@ -244,7 +248,7 @@ parser.add_argument(
     '-np',
     '--noplot',
     dest='showPlot',
-    action='store_false',
+    action='store_true',
     help='no plot is shown during execution')
 args = parser.parse_args()
 
@@ -308,14 +312,17 @@ showPlot = args.showPlot
 # print('detCoordType = %s' % detCoordType)
 # print('showPlot %s' % showPlot)
 
+print("1")
 # Get groundtruth boxes
 allBoundingBoxes, allClasses = getBoundingBoxes(
     gtFolder, True, gtFormat, gtCoordType, imgSize=imgSize)
+print("got gt")
 # Get detected boxes
 allBoundingBoxes, allClasses = getBoundingBoxes(
     detFolder, False, detFormat, detCoordType, allBoundingBoxes, allClasses, imgSize=imgSize)
 allClasses.sort()
-
+print("2")
+# exit(1)
 evaluator = Evaluator()
 acc_AP = 0
 validClasses = 0

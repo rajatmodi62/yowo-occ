@@ -31,7 +31,10 @@ class FocalLoss(nn.Module):
     def __init__(self, class_num, alpha=None, gamma=2, size_average=True):
         super(FocalLoss, self).__init__()
         if alpha is None:
-            self.alpha = Variable(torch.ones(class_num, 1))
+            print("alpha class num", class_num)
+            self.alpha = Variable(torch.ones(class_num, 1))#.cuda()
+            print("done")
+            # exit(1)
         else:
             if isinstance(alpha, Variable):
                 self.alpha = alpha
@@ -49,13 +52,19 @@ class FocalLoss(nn.Module):
 
         class_mask = inputs.data.new(N, C).fill_(0)
         class_mask = Variable(class_mask)
+        # print("shape targets", targets.shape)
+        # print("targets", targets)
         ids = targets.view(-1, 1)
-        class_mask.scatter_(1, ids, 1.)
-        #print(class_mask)
-        
+        # print("before blunder---------___>",class_mask.shape,ids.data.shape)
+        # print(class_mask)
+        # print(ids)
 
+        class_mask.scatter_(1, ids, 1.)
+        # print("after scatter",class_mask.shape)
         if inputs.is_cuda and not self.alpha.is_cuda:
             self.alpha = self.alpha.cuda()
+        # print("after blunder ->>>>>>>",ids.data.shape)
+        
         alpha = self.alpha[ids.data.view(-1)]
         
         probs = (P*class_mask).sum(1).view(-1,1)
@@ -66,8 +75,8 @@ class FocalLoss(nn.Module):
 
         batch_loss = -alpha*(torch.pow((1-probs), self.gamma))*log_p 
         #print('-----bacth_loss------')
-        #print(batch_loss)
-
+        # print(batch_loss)
+        # exit(1)
         
         if self.size_average:
             loss = batch_loss.mean()

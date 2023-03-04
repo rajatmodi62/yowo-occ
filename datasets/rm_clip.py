@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # encoding: utf-8
+#loading occluded detections
 import random
 import os
 import torch
@@ -7,9 +8,9 @@ from PIL import Image
 import numpy as np
 from core.utils import *
 import cv2
-
-
-
+from pathlib import Path
+import skvideo
+import skvideo.io
 def scale_image_channel(im, c, v):
     cs = list(im.split())
     cs[c] = cs[c].point(lambda i: i * v)
@@ -141,7 +142,7 @@ def fill_truth_detection(labpath, w, h, flip, dx, dy, sx, sy):
     # print("label shape", label.shape,np.max(label))
     return label
 
-def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, shape, dataset_use='ucf24', jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5):
+def load_data_detection(base_path, imgpath,yaml_path, occ_root, train, train_dur, sampling_rate, shape, dataset_use='ucf24', jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5):
     # clip loading and  data augmentation
 
     im_split = imgpath.split('/')
@@ -151,8 +152,8 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
 
     img_folder = os.path.join(base_path, 'rgb-images', im_split[0], im_split[1])
     
-    print("base path", "image_path",base_path,imgpath)
-    exit(1)
+    # print("base path", "image_path",base_path,imgpath)
+    # exit(1)
     if dataset_use == 'ucf24':
         max_num = len(os.listdir(img_folder))
     elif dataset_use == 'jhmdb21':
@@ -166,7 +167,7 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
     d = sampling_rate
     if train:
         d = random.randint(1, 2)
-
+    f_ids = []
     for i in reversed(range(train_dur)):
         # make it as a loop
         i_temp = im_ind - i * d
@@ -181,9 +182,34 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
             path_tmp = os.path.join(base_path, 'rgb-images', im_split[0], im_split[1] ,'{:05d}.jpg'.format(i_temp))
         elif dataset_use == 'jhmdb21':
             path_tmp = os.path.join(base_path, 'rgb-images', im_split[0], im_split[1] ,'{:05d}.png'.format(i_temp))
+        f_id = path_tmp.split('/')[-1].split('.')[0]
+        f_id = int(f_id)-1
+        f_ids.append(f_id)
+        # clip.append(Image.open(path_tmp).convert('RGB'))
+    # img = np.array(clip[0])
+    # print("img shape", img.shape)
+    # exit(1)
+    # print(yaml_path)
+    pieces = yaml_path.split('/')
+    dataset = pieces[-4]
+    split = 'test'
+    distribution = pieces[-3]
+    occ_type =pieces[-1].split('.')[0]
+    # print(dataset, split, distribution, occ_type)
+    # print(f_ids,im_split[0], im_split[1])
+    v_name = im_split[1] + '.avi'
+    clip_path = Path(occ_root)/dataset/distribution/split/occ_type/im_split[0]/im_split[1]
+    
+    video = skvideo.io.vread(str(clip_path/v_name))
+    # print(video.shape, np.min(video), np.max(video))
 
-        clip.append(Image.open(path_tmp).convert('RGB'))
-
+    # print("clip path", str(clip_path/v_name))
+    clip = []
+    for f_id in f_ids:
+        im = Image.fromarray(np.uint8((video[f_id])))
+        clip.append(im)
+    # print("clip shape", clip[0].shape)
+    # exit(1)
     if train: # Apply augmentation
         pass
 

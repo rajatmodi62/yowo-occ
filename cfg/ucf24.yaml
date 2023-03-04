@@ -1,11 +1,12 @@
 TRAIN:
   RESUME_PATH: "/media/yogesh/rm2/occlusion_work/YOWO/assets/trained_weights/yowo_ucf101-24_16f_best.pth"
   DATASET: ucf24  # `ava`, `ucf24` or `jhmdb21`
+  OCCLUSION_DATA_DIR: "/mnt/mount_occlusion" #root of the occlusion folder
   BATCH_SIZE: 10
   TOTAL_BATCH_SIZE: 128
   LEARNING_RATE: 1e-4
   EVALUATE: False
-  EVALUATE_DIR: "godzilla"
+  EVALUATE_DIR: "backup/ucf24"
   FINE_TUNE: False
   BEGIN_EPOCH: 1
   END_EPOCH: 10

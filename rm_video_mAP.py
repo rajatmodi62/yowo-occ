@@ -12,8 +12,8 @@ from cfg import parser
 from core.model import YOWO
 from core.utils import *
 from core.eval_results import *
-
-
+from pathlib import Path
+import json
 
 ####### Load configuration arguments
 # ---------------------------------------------------------------
@@ -79,6 +79,7 @@ def get_clip(root, imgpath, train_dur, sampling_rate, dataset):
     clip = [] 
 
     d = sampling_rate
+    f_ids = []
     for i in reversed(range(train_dur)):
         i_img = im_ind - i * d
         if i_img < 1:
@@ -90,6 +91,13 @@ def get_clip(root, imgpath, train_dur, sampling_rate, dataset):
             path_tmp = os.path.join(base_path, 'rgb-images', class_name, file_name, '{:05d}.jpg'.format(i_img))
         elif dataset == 'jhmdb21':
             path_tmp = os.path.join(base_path, 'rgb-images', class_name, file_name, '{:05d}.png'.format(i_img))      
+        
+        print("reading",path_tmp)
+        f_id = path_tmp.split('/')[-1].split('.')[0]
+        f_id = int(f_id)
+        f_id = f_id-1
+        f_ids.append(f_id)
+        # print("fid",f_ids)
         clip.append(Image.open(path_tmp).convert('RGB'))
 
     label = torch.zeros(50 * 5)
@@ -109,8 +117,8 @@ def get_clip(root, imgpath, train_dur, sampling_rate, dataset):
     return clip, label, img_name
 
 class testData(Dataset):
-    def __init__(self, root, shape=None, transform=None, clip_duration=16, sampling_rate=1):
-
+    def __init__(self, yaml_path,root, shape=None, transform=None, clip_duration=16, sampling_rate=1):
+        self.yaml_path = yaml_path
         self.root = root
         if dataset == 'ucf24':
             self.label_paths = sorted(glob.glob(os.path.join(root, '*.jpg')))
@@ -139,7 +147,7 @@ class testData(Dataset):
 
         return clip, label, img_name
 
-def video_mAP_ucf():
+def video_mAP_ucf(dump_dir=None, yaml_path=None):
     """
     Calculate video_mAP over the test dataset
     """
@@ -198,7 +206,7 @@ def video_mAP_ucf():
         print(line)
         line = line.rstrip()
         test_loader = torch.utils.data.DataLoader(
-                          testData(os.path.join(base_path, 'rgb-images', line),
+                          testData(yaml_path,os.path.join(base_path, 'rgb-images', line),
                           shape=(224, 224), transform=transforms.Compose([
                           transforms.ToTensor()]), clip_duration=clip_duration, sampling_rate=sampling_rate),
                           batch_size=64, shuffle=False, num_workers= 8, pin_memory= True)
@@ -241,7 +249,7 @@ def video_mAP_ucf():
 
 
 
-def video_mAP_jhmdb():
+def video_mAP_jhmdb(dump_dir=None, yaml_path=None):
     """
     Calculate video_mAP over the test set
     """
@@ -268,7 +276,7 @@ def video_mAP_jhmdb():
         line = line.rstrip()
 
         test_loader = torch.utils.data.DataLoader(
-                          testData(os.path.join(base_path, 'rgb-images', line),
+                          testData(yaml_path,os.path.join(base_path, 'rgb-images', line),
                           shape=(224, 224), transform=transforms.Compose([
                           transforms.ToTensor()]), clip_duration=clip_duration, sampling_rate=sampling_rate),
                           batch_size=1, shuffle=False, num_workers= 8, pin_memory= True)
@@ -339,9 +347,37 @@ def video_mAP_jhmdb():
         print(evaluate_videoAP(gt_videos, detected_boxes, CLASSES, iou_th, True))
         res.append([iou_th,evaluate_videoAP(gt_videos, detected_boxes, CLASSES, iou_th, True)])
         print(res)
-if __name__ == '__main__':
-    if cfg.TRAIN.DATASET == 'ucf24':
-        video_mAP_ucf()
-    elif cfg.TRAIN.DATASET == 'jhmdb21':
-        video_mAP_jhmdb()
+
+    #get the dir 
+    occ_type = str(yaml_path).split('/')[-1].split('.')[0]
+    save_dir = Path(dump_dir)/occ_type/'results'
+    save_dir.mkdir(exist_ok=True, parents = True)
+    save_dir = save_dir/'vmap.json'
     
+    d = {'0':res}
+    out_file = open(str(save_dir), "w")
+  
+    json.dump(d, out_file, indent = 6)
+  
+    out_file.close()
+    # exit(1)
+if __name__ == '__main__':
+    if dataset=='ucf24':
+        occ_conf_path = Path('./occ_configs')/'ucf'/'**/*.yaml'
+    else:
+        occ_conf_path = Path('./occ_configs')/'jhmdb'/'**/*.yaml'
+
+    yaml_paths = sorted(glob.glob(str(occ_conf_path),recursive =True))
+    # data_root = cfg.TRAIN.OCCLUSION_DATA_DIR+ '/**/*.yaml'
+    # data_root = cfg.TRAIN.OCCLUSION_DATA_DIR
+    dump_dir = cfg.TRAIN.EVALUATE_DIR
+    print("dump dir",dump_dir)
+    # exit(1)
+    print("yaml paths", yaml_paths)
+    for yaml_path in yaml_paths:
+
+        if cfg.TRAIN.DATASET == 'ucf24':
+            video_mAP_ucf(dump_dir,yaml_path)
+        elif cfg.TRAIN.DATASET == 'jhmdb21':
+            video_mAP_jhmdb(dump_dir,yaml_path)
+        

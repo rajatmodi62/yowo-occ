@@ -70,7 +70,7 @@ _C.TRAIN.ONLY_DETECT = False
 _C.TRAIN.EVALUATE = False
 #rajat add directories for dumping 
 _C.TRAIN.EVALUATE_DIR = 'ucf_clean'
-
+_C.TRAIN.OCCLUSION_DATA_DIR = ''
 
 
 

@@ -1,0 +1,8 @@
+occlusion:
+  actor_high_th: 40
+  actor_low_th: 20
+  bg_high_th: 60
+  bg_low_th: 40
+  dataset: jhmdb
+  distribution: iid
+  trajectory: circle

@@ -1,0 +1,8 @@
+occlusion:
+  actor_high_th: 60
+  actor_low_th: 40
+  bg_high_th: 40
+  bg_low_th: 20
+  dataset: ucf
+  distribution: iid
+  trajectory: static

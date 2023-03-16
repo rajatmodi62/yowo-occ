@@ -2,15 +2,15 @@ TRAIN:
   RESUME_PATH: "assets/trained_weights/yowo_ucf101-24_16f_best.pth"
   DATASET: ucf24  # `ava`, `ucf24` or `jhmdb21`
   OCCLUSION_DATA_DIR: "/mnt/mount_occlusion" #root of the occlusion folder
-  DISTRIBUTION_DIR: "all"
+  DISTRIBUTION_DIR: "iid"
   BATCH_SIZE: 10
   TOTAL_BATCH_SIZE: 128
   LEARNING_RATE: 1e-4
   EVALUATE: False
-  EVALUATE_DIR: "backup/ucf24/train_now"
+  EVALUATE_DIR: "trained_weights/ucf_iid_aug"
   FINE_TUNE: False
   BEGIN_EPOCH: 1
-  END_EPOCH: 10
+  END_EPOCH: 5
 SOLVER:
   MOMENTUM: 0.9
   WEIGHT_DECAY: 5e-4
@@ -52,5 +52,5 @@ LISTDATA:
     "SkateBoarding", "Skiing", "Skijet", "SoccerJuggling", "Surfing",
     "TennisSwing", "TrampolineJumping", "VolleyballSpiking", "WalkingWithDog"
   ]
-BACKUP_DIR: "backup/ucf24/train_now"
+BACKUP_DIR: "trained_weights/ucf_iid_aug"
 RNG_SEED: 1

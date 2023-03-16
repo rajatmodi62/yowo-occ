@@ -7,10 +7,10 @@ TRAIN:
   TOTAL_BATCH_SIZE: 128
   LEARNING_RATE: 1e-4
   EVALUATE: False
-  EVALUATE_DIR: "backup/ucf24/train_now"
+  EVALUATE_DIR: "trained_weights/ucf_combined_aug"
   FINE_TUNE: False
   BEGIN_EPOCH: 1
-  END_EPOCH: 10
+  END_EPOCH: 5
 SOLVER:
   MOMENTUM: 0.9
   WEIGHT_DECAY: 5e-4
@@ -52,5 +52,5 @@ LISTDATA:
     "SkateBoarding", "Skiing", "Skijet", "SoccerJuggling", "Surfing",
     "TennisSwing", "TrampolineJumping", "VolleyballSpiking", "WalkingWithDog"
   ]
-BACKUP_DIR: "backup/ucf24/train_now"
+BACKUP_DIR: "trained_weights/ucf_combined_aug"
 RNG_SEED: 1

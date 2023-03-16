@@ -2,15 +2,15 @@ TRAIN:
   RESUME_PATH: "assets/trained_weights/yowo_jhmdb-21_16f_best.pth"
   DATASET: jhmdb21  # `ava`, `ucf24` or `jhmdb21`
   OCCLUSION_DATA_DIR: "/mnt/mount_occlusion"
-  DISTRIBUTION_DIR: "iid"
+  DISTRIBUTION_DIR: "ood"
   BATCH_SIZE: 2
   TOTAL_BATCH_SIZE: 128
   LEARNING_RATE: 1e-4
   EVALUATE: False
-  EVALUATE_DIR: "backup/jhmdb"
+  EVALUATE_DIR: "trained_weights/jhmdb_ood_aug"
   FINE_TUNE: False
   BEGIN_EPOCH: 1
-  END_EPOCH: 10
+  END_EPOCH: 5
 SOLVER:
   MOMENTUM: 0.9
   WEIGHT_DECAY: 5e-4
@@ -51,5 +51,5 @@ LISTDATA:
     "run", "shoot_ball", "shoot_bow", "shoot_gun", "sit",
     "stand", "swing_baseball", "throw", "walk", "wave"
   ]
-BACKUP_DIR: "backup/jhmdb"
+BACKUP_DIR: "trained_weights/jhmdb_iid_aug"
 RNG_SEED: 1

@@ -1,5 +1,9 @@
 #!/usr/bin/python
 # encoding: utf-8
+
+##### THIS CODE WILL NOT BE CALLED FOR TESTING 
+##### COMMENT TEST LOADER WHILE TRAINING 
+
 import random
 import os
 import torch
@@ -7,8 +11,9 @@ from PIL import Image
 import numpy as np
 from core.utils import *
 import cv2
-
-
+from pathlib import Path 
+import glob 
+from skvideo.io import vread
 
 def scale_image_channel(im, c, v):
     cs = list(im.split())
@@ -141,7 +146,8 @@ def fill_truth_detection(labpath, w, h, flip, dx, dy, sx, sy):
     # print("label shape", label.shape,np.max(label))
     return label
 
-def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, shape, dataset_use='ucf24', jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5):
+#j is the json containin the v_ids and the paths 
+def load_data_detection(cfg, j,base_path, imgpath, train, train_dur, sampling_rate, shape, dataset_use='ucf24', jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5):
     # clip loading and  data augmentation
 
     im_split = imgpath.split('/')
@@ -151,8 +157,8 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
 
     img_folder = os.path.join(base_path, 'rgb-images', im_split[0], im_split[1])
     
-    print("base path", "image_path",base_path,imgpath)
-    exit(1)
+    # print("base path", "image_path",base_path,imgpath)
+    # exit(1)
     if dataset_use == 'ucf24':
         max_num = len(os.listdir(img_folder))
     elif dataset_use == 'jhmdb21':
@@ -167,6 +173,7 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
     if train:
         d = random.randint(1, 2)
 
+    f_ids = []
     for i in reversed(range(train_dur)):
         # make it as a loop
         i_temp = im_ind - i * d
@@ -181,10 +188,52 @@ def load_data_detection(base_path, imgpath, train, train_dur, sampling_rate, sha
             path_tmp = os.path.join(base_path, 'rgb-images', im_split[0], im_split[1] ,'{:05d}.jpg'.format(i_temp))
         elif dataset_use == 'jhmdb21':
             path_tmp = os.path.join(base_path, 'rgb-images', im_split[0], im_split[1] ,'{:05d}.png'.format(i_temp))
+        
+        cls, v_name, f_id = path_tmp.split('/')[-3:]
+        
+        v_id = [cls, v_name]
+        v_id = '/'.join(v_id)
+        f_id = int(f_id.split('.')[0])-1
+        f_ids.append(f_id)
+    # print("path_tmp", path_tmp)
+    
+    occ_data_dir = cfg.TRAIN.OCCLUSION_DATA_DIR
+    distribution = cfg.TRAIN.DISTRIBUTION_DIR
+    # print(j.keys())
+    # print("f_ids is", f_ids)
+    # print("v_name", v_name)
+    
+    # video_id = video_name.split('/')[-1]
+    paths = j[v_name]['train']
+    # print("before", len(paths))
+    if distribution=='all':
+        pass
+    else:
+        new_paths = []
+        for path in paths:
+            if distribution in path:
+                new_paths.append(path)
+        paths = new_paths 
+    # print("after filter", len(paths))           
+    path = random.choice(paths)
+    path = path.split('/')[3:]
 
-        clip.append(Image.open(path_tmp).convert('RGB'))
+    path = occ_data_dir +'/'+ '/'.join(path)
+    
+    # print("occ data dir", path)
+    video = vread(str(path))
+    # print("video shape", video.shape,f_ids)
+    for f_id in f_ids:
+        clip.append(Image.fromarray(video[f_id]))
+    # exit(1)
+    # clip.append(Image.open(path_tmp).convert('RGB'))
 
     if train: # Apply augmentation
+        
+        clip,flip,dx,dy,sx,sy = data_augmentation(clip, shape, jitter, hue, saturation, exposure)
+        label = fill_truth_detection(labpath, clip[0].width, clip[0].height, flip, dx, dy, 1./sx, 1./sy)
+        label = torch.from_numpy(label)
+
         pass
 
     else: # No augmentation

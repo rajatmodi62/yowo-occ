@@ -5,7 +5,7 @@ import os
 import glob
 import random
 import numpy as np
-
+import json
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
@@ -16,7 +16,7 @@ from datasets.clip import *
 class UCF_JHMDB_Dataset(Dataset):
 
     # clip duration = 8, i.e, for each time 8 frames are considered together
-    def __init__(self, base, root, dataset='ucf24', shape=None,
+    def __init__(self,cfg,  base, root, dataset='ucf24', shape=None,
                  transform=None, target_transform=None, 
                  train=False, clip_duration=16, sampling_rate=1):
         with open(root, 'r') as file:
@@ -31,7 +31,25 @@ class UCF_JHMDB_Dataset(Dataset):
         self.shape = shape
         self.clip_duration = clip_duration
         self.sampling_rate = sampling_rate
+        self.cfg = cfg
 
+        self.occ_data_dir = cfg.TRAIN.OCCLUSION_DATA_DIR
+        self.distribution = cfg.TRAIN.DISTRIBUTION_DIR
+
+        
+        if dataset=='ucf24':
+            self.json_path = './ucf.json'
+        else:
+            self.json_path = './jhmdb.json'
+        
+        with open(self.json_path, "r") as read_file:
+            self.d = json.load(read_file)
+            # print("read json---")
+            # print(len(self.d.keys()))
+            # exit(1)
+        print("krishna", self.occ_data_dir, self.distribution, self.json_path)
+        # exit(1)
+        
     def __len__(self):
         return self.nSamples
 
@@ -45,10 +63,10 @@ class UCF_JHMDB_Dataset(Dataset):
             saturation = 1.5 
             exposure = 1.5
 
-            clip, label = load_data_detection(self.base_path, imgpath,  self.train, self.clip_duration, self.sampling_rate, self.shape, self.dataset, jitter, hue, saturation, exposure)
+            clip, label = load_data_detection(self.cfg,self.d, self.base_path, imgpath,  self.train, self.clip_duration, self.sampling_rate, self.shape, self.dataset, jitter, hue, saturation, exposure)
 
         else: # For Testing
-            frame_idx, clip, label = load_data_detection(self.base_path, imgpath, False, self.clip_duration, self.sampling_rate, self.shape, self.dataset)
+            frame_idx, clip, label = load_data_detection(self.cfg,self.d, self.base_path, imgpath, False, self.clip_duration, self.sampling_rate, self.shape, self.dataset)
             clip = [img.resize(self.shape) for img in clip]
 
         if self.transform is not None:

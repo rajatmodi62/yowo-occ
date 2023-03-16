@@ -56,7 +56,7 @@ def train_ucf24_jhmdb21(cfg, epoch, model, train_loader, loss_module, optimizer)
         # save result every 1000 batches
         if batch_idx % 2000 == 0: # From time to time, reset averagemeters to see improvements
             loss_module.reset_meters()
-        break
+        # break
     t1 = time.time()
     logging('trained with %f samples/s' % (len(train_loader.dataset)/(t1-t0)))
     print('')

@@ -106,11 +106,11 @@ if dataset == 'ava':
 
 
 elif dataset in ['ucf24', 'jhmdb21']:
-    train_dataset = list_dataset.UCF_JHMDB_Dataset(cfg.LISTDATA.BASE_PTH, cfg.LISTDATA.TRAIN_FILE, dataset=dataset,
+    train_dataset = list_dataset.UCF_JHMDB_Dataset(cfg, cfg.LISTDATA.BASE_PTH, cfg.LISTDATA.TRAIN_FILE, dataset=dataset,
                        shape=(cfg.DATA.TRAIN_CROP_SIZE, cfg.DATA.TRAIN_CROP_SIZE),
                        transform=transforms.Compose([transforms.ToTensor()]), 
                        train=True, clip_duration=cfg.DATA.NUM_FRAMES, sampling_rate=cfg.DATA.SAMPLING_RATE)
-    test_dataset  = list_dataset.UCF_JHMDB_Dataset(cfg.LISTDATA.BASE_PTH, cfg.LISTDATA.TEST_FILE, dataset=dataset,
+    test_dataset  = list_dataset.UCF_JHMDB_Dataset(cfg, cfg.LISTDATA.BASE_PTH, cfg.LISTDATA.TEST_FILE, dataset=dataset,
                        shape=(cfg.DATA.TRAIN_CROP_SIZE, cfg.DATA.TRAIN_CROP_SIZE),
                        transform=transforms.Compose([transforms.ToTensor()]), 
                        train=False, clip_duration=cfg.DATA.NUM_FRAMES, sampling_rate=cfg.DATA.SAMPLING_RATE)
@@ -133,14 +133,18 @@ if cfg.TRAIN.EVALUATE:
     test(cfg, 0, model, test_loader)
 else:
     # for epoch in range(cfg.TRAIN.BEGIN_EPOCH, cfg.TRAIN.END_EPOCH + 1):
+    
     for epoch in range(0, cfg.TRAIN.END_EPOCH + 1):
-
+        print("doing for ",cfg.TRAIN.END_EPOCH )
         # Adjust learning rate
         lr_new = adjust_learning_rate(optimizer, epoch, cfg)
         
         # Train and test model
         logging('training at epoch %d, lr %f' % (epoch, lr_new))
+
+        #only traiing is performed, no testing since we dont need confusion in occlusions 
         train(cfg, epoch, model, train_loader, loss_module, optimizer)
+        
         logging('testing at epoch %d' % (epoch))
         # score = test(cfg, epoch, model, test_loader)
 

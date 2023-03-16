@@ -71,7 +71,7 @@ _C.TRAIN.EVALUATE = False
 #rajat add directories for dumping 
 _C.TRAIN.EVALUATE_DIR = 'ucf_clean'
 _C.TRAIN.OCCLUSION_DATA_DIR = ''
-
+_C.TRAIN.DISTRIBUTION_DIR = 'all'
 
 
 _C.TRAIN.BEGIN_EPOCH = 1

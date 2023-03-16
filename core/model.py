@@ -87,7 +87,7 @@ class YOWO(nn.Module):
         x = self.cfam(x)
 
         out = self.conv_final(x)
-        print("forawrd completed---")
+        # print("forawrd completed---")
         return out
 
 

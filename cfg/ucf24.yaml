@@ -3,11 +3,11 @@ TRAIN:
   DATASET: ucf24  # `ava`, `ucf24` or `jhmdb21`
   OCCLUSION_DATA_DIR: "/mnt/mount_occlusion" #root of the occlusion folder
   DISTRIBUTION_DIR: "all"
-  BATCH_SIZE: 10
+  BATCH_SIZE: 40
   TOTAL_BATCH_SIZE: 128
   LEARNING_RATE: 1e-4
   EVALUATE: False
-  EVALUATE_DIR: "backup/ucf24/train_now"
+  EVALUATE_DIR: "trained_weights/ucf_clean"
   FINE_TUNE: False
   BEGIN_EPOCH: 1
   END_EPOCH: 10
@@ -52,5 +52,5 @@ LISTDATA:
     "SkateBoarding", "Skiing", "Skijet", "SoccerJuggling", "Surfing",
     "TennisSwing", "TrampolineJumping", "VolleyballSpiking", "WalkingWithDog"
   ]
-BACKUP_DIR: "backup/ucf24/train_now"
+BACKUP_DIR: "trained_weights/ucf_clean"
 RNG_SEED: 1
